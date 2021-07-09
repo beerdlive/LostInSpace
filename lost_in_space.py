@@ -26,6 +26,20 @@ class Explosion(Sprite):
     def update(self, *args, **kwargs):
         pass
 
+class Bullet(Sprite):
+    def __init__(self, x, y, *groups):
+        super().__init__(*groups)
+        self.image = pygame.image.load("images/bullet.png").convert_alpha()
+        self.world_rect = self.image.get_rect().move(x, y)
+
+    def update(self, keys, *args, **kwargs):
+        if keys[pygame.K_SPACE]:
+            self.shoot()
+
+    def shoot(self):
+        self.world_rect.move_ip((50, 0))
+
+
 class Player(Sprite):
     def __init__(self, *groups):
         super().__init__(*groups)
@@ -55,18 +69,18 @@ class Player(Sprite):
         self.update_inset()
 
     def move_left(self):
-        self.world_rect.left -= 10
+        self.world_rect.left -= 15
         self.image = self.facing_left
 
     def move_right(self):
-        self.world_rect.left += 10
+        self.world_rect.left += 15
         self.image = self.facing_right
 
     def move_up(self):
-        self.world_rect.top -= 10
+        self.world_rect.top -= 8
 
     def move_down(self):
-        self.world_rect.top += 10
+        self.world_rect.top += 8
 
 class BadGuy(Sprite):
     def __init__(self, x, y, *groups):
@@ -111,6 +125,7 @@ class Game:
         self.player = Player()
         self.player_group = Group()
         self.player_group.add(self.player)
+        self.player_group.add(Bullet(self.player.world_rect.left, self.player.world_rect.top))
         self.bad_guys = Group()
         for i in range(10):
             self.bad_guys.add(BadGuy(random.randrange(0, settings.WORLD_WIDTH),
@@ -133,9 +148,9 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    pass
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_SPACE:
+            #         pass
 
     def update(self):
         self.player_group.update(key.get_pressed())
@@ -152,6 +167,7 @@ class Game:
             self.player.kill()
             collided_with.kill()
             self.player_group.add(Explosion(self.player.world_rect.left, self.player.world_rect.top))
+
 
     def draw(self):
         self.screen.fill((0, 0, 20))
