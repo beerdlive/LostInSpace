@@ -30,6 +30,12 @@ moving_right = False
 shoot = False
 
 # load images
+# store tiles in list
+img_list = []
+for x in range(TILE_TYPES):
+    img = pygame.image.load(f'images/tile/{x}.png')
+    img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
+    img_list.append(img)
 # bullet
 bullet_img = pygame.image.load('images/icons/bullet_img.png').convert_alpha()
 bullet_img = pygame.transform.scale(bullet_img, (int(bullet_img.get_width() * 2), (int(bullet_img.get_height() * 2))))
@@ -128,7 +134,7 @@ class Character(Sprite):
             self.vel_y
         dy += self.vel_y
 
-        # check collision with floor
+        # check collision
         if self.rect.bottom + dy > 400:
             dy = 400 - self.rect.bottom
             self.in_air = False
@@ -212,6 +218,70 @@ class Character(Sprite):
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
+class World():
+    def __init__(self):
+        self.obstacle_list = []
+
+    def process_data(self, data):
+        # iterate through each value in level data file
+        for y, row in enumerate(data):
+            for x, tile in enumerate(row):
+                if tile >= 0:
+                    img = img_list[tile]
+                    img_rect = img.get_rect()
+                    img_rect.x = x * TILE_SIZE
+                    img_rect.y = y * TILE_SIZE
+                    tile_data = (img, img_rect)
+                    if tile >= 0 and tile <= 8:
+                        self.obstacle_list.append(tile_data)
+                    elif tile >= 9 and tile <= 10:
+                        water = Water(img, x * TILE_SIZE, y * TILE_SIZE)
+                        water_group.add(water)
+                    elif tile >= 11 and tile <= 14:
+                        decoration = Decoration(img, x * TILE_SIZE, y * TILE_SIZE)
+                        decoration_group.add(decoration)
+                    elif tile == 15:  # create player
+                        player = Character('player', x * TILE_SIZE, y * TILE_SIZE, 2, 5, 100)
+                        health_bar = HealthBar(10, 10, player.health, player.health)
+                    elif tile == 16:
+                        enemy = Character('enemy1', x * TILE_SIZE, y * TILE_SIZE, 2, 2, 50)
+                        enemy_group.add(enemy)
+                    elif tile == 17: # ammo
+                        pass
+                    elif tile == 18: # grenade
+                        pass
+                    elif tile == 19: # health
+                        pass
+                    elif tile == 20: # create exit
+                        exit = Exit(img, x * TILE_SIZE, y * TILE_SIZE)
+                        exit_group.add(exit)
+        return player, health_bar
+
+    def draw(self):
+        for tile in self.obstacle_list:
+            screen.blit(tile[0], tile[1])
+
+class Decoration(Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+
+class Water(Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+
+class Exit(Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+
 class HealthBar():
     def __init__(self, x, y, health, max_health):
         self.x = x
@@ -259,23 +329,35 @@ class Bullet(Sprite):
 # create sprite groups
 enemy_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
+decoration_group = pygame.sprite.Group()
+water_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
 
 
-player = Character('player', 200, 200, 2, 5, 100)
-health_bar = HealthBar(10, 10, player.health, player.health)
+# create empty tile list
+world_data = []
+for row in range(ROWS):
+    r = [-1] * COLS
+    world_data.append(r)
+# load in level data and create world
+with open(f'level{level}_data.csv', newline='') as csvfile:
+    reader = csv.reader(csvfile, delimiter=',')
+    for x, row in enumerate(reader):
+        for y, tile in enumerate(row):
+            world_data[x][y] = int(tile)
+world = World()
+player, health_bar = world.process_data(world_data)
 
-enemy1 = Character('enemy1', 400, 300, 2, 2, 50)
-enemy2 = Character('enemy1', 550, 300, 2, 2, 50)
-enemy_group.add(enemy1)
-enemy_group.add(enemy2)
-
-#
 
 run = True
 while run:
 
     clock.tick(FPS)
+
+    # update background
     draw_bg()
+    # draw world map
+    world.draw()
     # show health
     health_bar.draw(player.health)
     # draw_text(f'HEALTH: {player.health}', font, WHITE, 10, 35)
@@ -290,7 +372,13 @@ while run:
 
     # update and draw groups
     bullet_group.update()
+    decoration_group.update()
+    water_group.update()
+    exit_group.update()
     bullet_group.draw(screen)
+    decoration_group.draw(screen)
+    water_group.draw(screen)
+    exit_group.draw(screen)
 
     # update player actions
     if player.alive:
