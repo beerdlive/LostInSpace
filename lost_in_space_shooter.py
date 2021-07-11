@@ -41,10 +41,10 @@ start_img = pygame.image.load('images/start_btn.png').convert_alpha()
 exit_img = pygame.image.load('images/exit_btn.png').convert_alpha()
 restart_img = pygame.image.load('images/restart_btn.png').convert_alpha()
 # background
-pine1_img = pygame.image.load('images/background/pine1.png').convert_alpha()
-pine2_img = pygame.image.load('images/background/pine2.png').convert_alpha()
+mountain1_img = pygame.image.load('images/background/mountain1.png').convert_alpha()
+mountain2_img = pygame.image.load('images/background/mountain2.png').convert_alpha()
 mountain_img = pygame.image.load('images/background/mountain.png').convert_alpha()
-sky_img = pygame.image.load('images/background/sky_cloud.png').convert_alpha()
+space_img = pygame.image.load('images/background/space.png').convert_alpha()
 # store tiles in list
 img_list = []
 for x in range(TILE_TYPES):
@@ -89,12 +89,12 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_bg():
     screen.fill(BG)
-    width = sky_img.get_width()
+    width = space_img.get_width()
     for x in range(6):
-        screen.blit(sky_img, ((x * width) - bg_scroll * 0.5, 0))
+        screen.blit(space_img, ((x * width) - bg_scroll * 0.5, 0))
         screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
-        screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
-        screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height()))
+        screen.blit(mountain1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - mountain1_img.get_height() - 150))
+        screen.blit(mountain2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - mountain2_img.get_height()))
 
 
 # function to reset level
