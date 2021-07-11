@@ -59,17 +59,17 @@ bullet_img = pygame.transform.scale(bullet_img, (int(bullet_img.get_width() * 1.
 # enemy1 bullet
 enemy1_bullet_img = pygame.image.load('images/icons/enemy1_bullet_img.png').convert_alpha()
 enemy1_bullet_img = pygame.transform.scale(enemy1_bullet_img, (int(enemy1_bullet_img.get_width()),
-                                                        (int(enemy1_bullet_img.get_height()))))
+                                                               (int(enemy1_bullet_img.get_height()))))
 
 # enemy2 bullet
 enemy2_bullet_img = pygame.image.load('images/icons/enemy2_bullet_img.png').convert_alpha()
 enemy2_bullet_img = pygame.transform.scale(enemy2_bullet_img, (int(enemy2_bullet_img.get_width() * 2.5),
-                                                        (int(enemy2_bullet_img.get_height() * 2.5))))
+                                                               (int(enemy2_bullet_img.get_height() * 2.5))))
 
 # enemy3 bullet
 enemy3_bullet_img = pygame.image.load('images/icons/enemy3_bullet_img.png').convert_alpha()
 enemy3_bullet_img = pygame.transform.scale(enemy3_bullet_img, (int(enemy3_bullet_img.get_width() * 1.5),
-                                                        (int(enemy3_bullet_img.get_height() * 1.5))))
+                                                               (int(enemy3_bullet_img.get_height() * 1.5))))
 
 # define colors
 BG = (0, 0, 20)
@@ -81,9 +81,11 @@ BLACK = (0, 0, 0)
 # define font
 font = pygame.font.SysFont('Asphalt', 30)
 
+
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
+
 
 def draw_bg():
     screen.fill(BG)
@@ -93,6 +95,7 @@ def draw_bg():
         screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
         screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
         screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height()))
+
 
 # function to reset level
 def reset_level():
@@ -110,6 +113,7 @@ def reset_level():
         r = [-1] * COLS
         data.append(r)
     return data
+
 
 class Character(Sprite):
     def __init__(self, char_type, x, y, scale, speed, health):
@@ -235,8 +239,8 @@ class Character(Sprite):
         # update scroll based on player position
         if self.char_type == 'player':
             if (self.rect.right > SCREEN_WIDTH - SCROLL_THRESH and bg_scroll <
-                    (world.level_length * TILE_SIZE) - SCREEN_WIDTH)\
-                        or (self.rect.left < SCROLL_THRESH and bg_scroll > abs(dx)):
+                (world.level_length * TILE_SIZE) - SCREEN_WIDTH) \
+                    or (self.rect.left < SCROLL_THRESH and bg_scroll > abs(dx)):
                 self.rect.x -= dx
                 screen_scroll = -dx
 
@@ -253,21 +257,21 @@ class Character(Sprite):
         if self.shoot_cooldown == 0:
             self.shoot_cooldown = 10
             bullet = EnemyBullet(self.rect.centerx + (self.rect.size[0] * self.direction), self.rect.centery,
-                            self.direction)
+                                 self.direction)
             enemy1_bullet_group.add(bullet)
 
     def enemy2_shoot(self):
         if self.shoot_cooldown == 0:
             self.shoot_cooldown = 60
             bullet = EnemyBullet2(self.rect.centerx + (self.rect.size[0] * self.direction), self.rect.centery,
-                            self.direction)
+                                  self.direction)
             enemy2_bullet_group.add(bullet)
 
     def enemy3_shoot(self):
         if self.shoot_cooldown == 0:
             self.shoot_cooldown = 60
             bullet = EnemyBullet3(self.rect.centerx + (self.rect.size[0] * self.direction), self.rect.centery,
-                            self.direction)
+                                  self.direction)
             enemy3_bullet_group.add(bullet)
 
     def ai(self):
@@ -376,14 +380,13 @@ class Character(Sprite):
             # scroll
             self.rect.x += screen_scroll
 
-
     def update_animation(self):
         # update animation
-        ANIMATION_COOLDOWN = 100
+        animation_cooldown = 100
         # update image depending on current frame
         self.image = self.animation_list[self.action][self.frame_index]
         # check if enough time has passed since last update
-        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
             self.update_time = pygame.time.get_ticks()
             self.frame_index += 1
         # if animation has run out then reset back to start
@@ -411,7 +414,8 @@ class Character(Sprite):
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
-class World():
+
+class World:
     def __init__(self):
         self.obstacle_list = []
 
@@ -458,6 +462,7 @@ class World():
             tile[1][0] += screen_scroll
             screen.blit(tile[0], tile[1])
 
+
 class Decoration(Sprite):
     def __init__(self, img, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -468,6 +473,7 @@ class Decoration(Sprite):
     def update(self):
         self.rect.x += screen_scroll
 
+
 class Lava(Sprite):
     def __init__(self, img, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -477,6 +483,7 @@ class Lava(Sprite):
 
     def update(self):
         self.rect.x += screen_scroll
+
 
 class ExitLevel(Sprite):
     def __init__(self, img, x, y):
@@ -633,7 +640,6 @@ decoration_group = pygame.sprite.Group()
 lava_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
 
-
 # create empty tile list
 world_data = []
 for row in range(ROWS):
@@ -647,7 +653,6 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
             world_data[x][y] = int(tile)
 world = World()
 player, health_bar = world.process_data(world_data)
-
 
 run = True
 while run:
