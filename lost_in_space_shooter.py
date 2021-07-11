@@ -63,8 +63,8 @@ enemy1_bullet_img = pygame.transform.scale(enemy1_bullet_img, (int(enemy1_bullet
 
 # enemy2 bullet
 enemy2_bullet_img = pygame.image.load('images/icons/enemy2_bullet_img.png').convert_alpha()
-enemy2_bullet_img = pygame.transform.scale(enemy2_bullet_img, (int(enemy2_bullet_img.get_width() * 2),
-                                                        (int(enemy2_bullet_img.get_height() * 2))))
+enemy2_bullet_img = pygame.transform.scale(enemy2_bullet_img, (int(enemy2_bullet_img.get_width() * 2.5),
+                                                        (int(enemy2_bullet_img.get_height() * 2.5))))
 
 # enemy3 bullet
 enemy3_bullet_img = pygame.image.load('images/icons/enemy3_bullet_img.png').convert_alpha()
@@ -136,7 +136,7 @@ class Character(Sprite):
         self.idling_counter = 0
 
         # load all images for the players
-        animation_types = ['Idle', 'Run', 'Jump', 'Death']
+        animation_types = ['Idle', 'Run', 'Jump', 'Attack', 'Death']
         for animation in animation_types:
             # reset temporary list of images
             temp_list = []
@@ -179,7 +179,7 @@ class Character(Sprite):
 
         # jump
         if self.jump is True and self.in_air is False:
-            self.vel_y = -15
+            self.vel_y = -12.5
             self.jump = False
             self.in_air = True
 
@@ -195,7 +195,7 @@ class Character(Sprite):
             if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
                 dx = 0
                 # if the ai has hit a wall, turn around
-                if self.char_type == 'enemy':
+                if self.char_type == 'enemy1' or 'enemy2' or 'enemy3':
                     self.direction *= -1
                     self.move_counter = 0
             # check collision in y direction
@@ -251,7 +251,7 @@ class Character(Sprite):
 
     def enemy1_shoot(self):
         if self.shoot_cooldown == 0:
-            self.shoot_cooldown = 30
+            self.shoot_cooldown = 10
             bullet = EnemyBullet(self.rect.centerx + (self.rect.size[0] * self.direction), self.rect.centery,
                             self.direction)
             enemy1_bullet_group.add(bullet)
@@ -273,9 +273,9 @@ class Character(Sprite):
     def ai(self):
         if self.char_type == 'enemy1':  # short enemy
             if self.alive and player.alive:
-                if self.idling is False and random.randint(1, 200) == 1:
-                    self.update_action(0)  # 0 is Idle
-                    self.idling = True
+                if self.idling is False and random.randint(1, 10) == 1:
+                    self.update_action(2)  # 0 is Idle
+                    self.jump = True
                     self.idling_counter = 50
                 # check if ai is near player
                 if self.vision.colliderect(player.rect):
@@ -294,7 +294,7 @@ class Character(Sprite):
                         self.update_action(1)  # 1 for Run
                         self.move_counter += 1
                         # update ai vision as enemy moves
-                        self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                        self.vision.center = (self.rect.centerx + 50 * self.direction, self.rect.centery)
 
                         if self.move_counter > TILE_SIZE:
                             self.direction *= -1
@@ -329,7 +329,7 @@ class Character(Sprite):
                         self.update_action(1)  # 1 for Run
                         self.move_counter += 1
                         # update ai vision as enemy moves
-                        self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                        self.vision.center = (self.rect.centerx + 200 * self.direction, self.rect.centery)
 
                         if self.move_counter > TILE_SIZE:
                             self.direction *= -1
@@ -364,7 +364,7 @@ class Character(Sprite):
                         self.update_action(1)  # 1 for Run
                         self.move_counter += 1
                         # update ai vision as enemy moves
-                        self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+                        self.vision.center = (self.rect.centerx + 150 * self.direction, self.rect.centery)
 
                         if self.move_counter > TILE_SIZE:
                             self.direction *= -1
@@ -388,7 +388,7 @@ class Character(Sprite):
             self.frame_index += 1
         # if animation has run out then reset back to start
         if self.frame_index >= len(self.animation_list[self.action]):
-            if self.action == 3:
+            if self.action == 4:
                 self.frame_index = len(self.animation_list[self.action]) - 1
             else:
                 self.frame_index = 0
@@ -406,7 +406,7 @@ class Character(Sprite):
             self.health = 0
             self.speed = 0
             self.alive = False
-            self.update_action(3)
+            self.update_action(4)
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
@@ -438,13 +438,13 @@ class World():
                         player = Character('player', x * TILE_SIZE, y * TILE_SIZE, 2, 5, 100)
                         health_bar = HealthBar(10, 10, player.health, player.health)
                     elif tile == 16:
-                        enemy = Character('enemy1', x * TILE_SIZE, y * TILE_SIZE, 2, 2, 50)
+                        enemy = Character('enemy1', x * TILE_SIZE, y * TILE_SIZE, 2, 7, 25)
                         enemy_group.add(enemy)
                     elif tile == 17:
-                        enemy = Character('enemy2', x * TILE_SIZE, y * TILE_SIZE, 2, 2, 50)
+                        enemy = Character('enemy2', x * TILE_SIZE, y * TILE_SIZE, 2, 0, 100)
                         enemy_group.add(enemy)
                     elif tile == 18:
-                        enemy = Character('enemy3', x * TILE_SIZE, y * TILE_SIZE, 2, 2, 50)
+                        enemy = Character('enemy3', x * TILE_SIZE, y * TILE_SIZE, 2, 4, 50)
                         enemy_group.add(enemy)
                     elif tile == 19:  # health
                         pass
@@ -505,6 +505,7 @@ class HealthBar():
         pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
         pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
 
+
 class Bullet(Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
@@ -532,10 +533,11 @@ class Bullet(Sprite):
                     enemy.health -= 25
                     self.kill()
 
+
 class EnemyBullet(Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
-        self.speed = 5
+        self.speed = 7
         self.image = enemy1_bullet_img
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -556,8 +558,9 @@ class EnemyBullet(Sprite):
         # check collision with characters
         if pygame.sprite.spritecollide(player, enemy1_bullet_group, False):
             if player.alive:
-                player.health -= 1
+                player.health -= 5
                 self.kill()
+
 
 class EnemyBullet2(Sprite):
     def __init__(self, x, y, direction):
@@ -583,19 +586,14 @@ class EnemyBullet2(Sprite):
         # check collision with characters
         if pygame.sprite.spritecollide(player, enemy2_bullet_group, False):
             if player.alive:
-                player.health -= 15
-                self.kill()
-
-        # check collision with bullets
-        if bullet_img in bullet_group:
-            if bullet_img.rect.colliderect(self.rect):
+                player.health -= 25
                 self.kill()
 
 
 class EnemyBullet3(Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
-        self.speed = 3
+        self.speed = 4
         self.image = enemy3_bullet_img
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -616,7 +614,7 @@ class EnemyBullet3(Sprite):
         # check collision with characters
         if pygame.sprite.spritecollide(player, enemy3_bullet_group, False):
             if player.alive:
-                player.health -= 8
+                player.health -= 20
                 self.kill()
 
 
@@ -723,6 +721,8 @@ while run:
                                 world_data[x][y] = int(tile)
                     world = World()
                     player, health_bar = world.process_data(world_data)
+                else:
+                    run = False
         else:
             screen_scroll = 0
             if restart_button.draw(screen):
