@@ -37,9 +37,9 @@ shoot = False
 
 # load images
 # button images
-start_img = pygame.image.load('images/start_btn.png').convert_alpha()
-exit_img = pygame.image.load('images/exit_btn.png').convert_alpha()
-restart_img = pygame.image.load('images/restart_btn.png').convert_alpha()
+start_img = pygame.image.load('images/btn/start_btn.png').convert_alpha()
+exit_img = pygame.image.load('images/btn/exit_btn.png').convert_alpha()
+restart_img = pygame.image.load('images/btn/restart_btn.png').convert_alpha()
 # background
 mountain1_img = pygame.image.load('images/background/mountain1.png').convert_alpha()
 mountain2_img = pygame.image.load('images/background/mountain2.png').convert_alpha()
@@ -430,12 +430,12 @@ class World:
                     img_rect.x = x * TILE_SIZE
                     img_rect.y = y * TILE_SIZE
                     tile_data = (img, img_rect)
-                    if tile >= 0 and tile <= 8:
+                    if 0 <= tile <= 8:
                         self.obstacle_list.append(tile_data)
-                    elif tile >= 9 and tile <= 10:
+                    elif 9 <= tile <= 10:
                         lava = Lava(img, x * TILE_SIZE, y * TILE_SIZE)
                         lava_group.add(lava)
-                    elif tile >= 11 and tile <= 14:
+                    elif 11 <= tile <= 14:
                         decoration = Decoration(img, x * TILE_SIZE, y * TILE_SIZE)
                         decoration_group.add(decoration)
                     elif tile == 15:  # create player
@@ -646,7 +646,7 @@ for row in range(ROWS):
     r = [-1] * COLS
     world_data.append(r)
 # load in level data and create world
-with open(f'level{level}_data.csv', newline='') as csvfile:
+with open(f'level_data/level{level}_data.csv', newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=',')
     for x, row in enumerate(reader):
         for y, tile in enumerate(row):
@@ -654,6 +654,8 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
 world = World()
 player, health_bar = world.process_data(world_data)
 
+
+# space Loop
 run = True
 while run:
 
